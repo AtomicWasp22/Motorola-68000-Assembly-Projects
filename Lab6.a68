@@ -1,0 +1,121 @@
+		.PSIZE	42
+		.TITLE	""
+
+/*
+Include the file ASCII.i.
+*/
+
+/*
+Lab 6
+Kian Jones
+Carleton ID: 101076671
+Submitted to: Ali Cherid
+Date: April 3rd, 2018
+*/
+
+
+
+
+		.NOLIST
+		.INCLUDE "..\\Include\\ASCII.i"
+		.LIST
+
+		.TEXT	1
+MsgKeyPress:	.ASCII	"Press any key to end program."
+		.BYTE	LF,0
+
+Class1Name:	.ASCII	"NET1004 - "
+		.BYTE	LF,0
+Class1Desc:	.ASCII	"Assembly and Machine Language	# of students: "
+		.BYTE	LF,0
+		
+Class2Name:	.ASCII	"NET1006 - "
+		.BYTE	LF,0
+Class2Desc:	.ASCII	"Routing and Switching	# of students: "
+		.BYTE	LF,0
+		
+Class3Name:	.ASCII	"FIN2300 - "
+		.BYTE	LF,0
+Class3Desc:	.ASCII	"Introduction to Personal Finance	# of students: "
+		.BYTE	LF,0		
+		
+		.TEXT	0
+		.GLOBAL	UndergraduateCalendar
+		.GLOBAL	Lab6
+
+Start:	link a6, #-32
+		move.w #0, (-32, a6) |Sets index to zero
+		
+		jsr InitCourse1 |pushes Course1 details into assorted registers 
+		
+		jsr InitCourse	|pushes assorted registers into memory
+		
+		jsr InitCourse2 |pushes Course2 details into assorted registers 
+		
+		jsr InitCourse	|pushes assorted registers into memory
+		
+		jsr InitCourse3 |pushes Course3 details into assorted registers 
+		
+		jsr InitCourse  |pushes assorted registers into memory
+		
+		move.w #0, (-32, a6)
+		bra PrintCourses |print courses
+		
+		
+
+InitCourse:
+		move.w (-32, a6), d1 |move index to d1
+		
+		move.l a0, (-30,a6,d1) |move CourseNameX --> a6 - 4 + index 
+		move.l a1, (-26, a6, d1) |move CourseNameX --> a6 - 8 + index
+		move.w d0, (-22, a6, d1) |move CourseNameX --> a6 - 10 + index
+		
+		addi.w #10, (-32, a6) |Add 10 to index
+		rts
+		
+		
+InitCourse1:
+		movea.l #Class1Name, a0
+		movea.l #Class1Desc, a1
+		move.w #9, d0
+		rts
+			
+InitCourse2:	
+		movea.l #Class2Name, a0
+		movea.l #Class2Desc, a1
+		move.w  #9, d0
+		rts
+		
+InitCourse3:	
+		movea.l #Class3Name, a0
+		movea.l #Class3Desc, a1
+		move.w #9, d0
+		rts	
+		
+PrintCourses:	
+		movea.w (-32, a6), a1
+		
+		move.l (-30, a6, a1), a0
+		jsr PrintMsg
+		
+		
+		move.l (-26, a6, a1), a0
+		jsr PrintMsg
+		
+		move.b #2, d1
+		move.w (-22, a6, a1), d0
+		jsr OutHex
+		jsr NewLine
+		
+		addi.w #10, (-32, a6)	
+	
+		cmpi #30, (-32, a6)
+		beq Exit
+		
+		bra PrintCourses
+		
+Exit:	unlk a6
+		movea.l	#MsgKeyPress,a0
+		jsr	PrintMsg
+		jsr	ConsoleIn
+		rts

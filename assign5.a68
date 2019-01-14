@@ -1,0 +1,172 @@
+	.PSIZE	42
+	.TITLE	"Testing Boundaries"
+
+/****************************************************************
+FILENAME: assign5.a68
+
+STUDENT NAME (AUTHOR): Kian Jones
+
+STUDENT NUMBER:Carleton 101076671
+
+STUDENT E-MAIL ADDRESS: jone0633@algonquincollege.com
+
+LAB SECTION: A3
+
+ASSIGNMENT NUMBER AND NAME:  Lab 5 - Instruction Translator
+
+PROFESSOR'S NAME: Dave Caughey
+
+PURPOSE: Translates a user provided hexadecimal value to an instruction
+****************************************************************/
+
+/*
+Include the file ASCII.i.
+*/
+		.NOLIST
+		.INCLUDE "..\\Include\\ASCII.i"
+		.LIST
+	
+		.DATA 0x1000
+
+		.TEXT	1
+		
+InputPrompt:	.ASCII	"Enter a 2-byte hexadecimal value, or 0 to quit: "
+				.BYTE	LF,0
+
+InvalidPrompt:  .ASCII	"Invalid input. Valid input includes 2-byte hexadecimal value (from 0000 - FFFF): "
+
+MoveaPrompt:    .ASCII	"Your instruction is MOVEA."
+				.BYTE	LF,0
+
+AddPrompt:      .ASCII	"Your instruction is ADDI."
+				.BYTE	LF,0
+
+
+ChkPrompt:      .ASCII	"Your instruction is CHK."
+				.BYTE	LF,0
+
+
+MuluPrompt:     .ASCII	"Your instruction is MULU"
+				.BYTE	LF,0
+
+
+BytePrompt :    .ASCII	"B"
+				.BYTE	CR,LF,0
+
+WordPrompt:     .ASCII	"W"
+				.BYTE	CR,LF,0
+
+LongPrompt:     .ASCII	"L"
+				.BYTE	CR,LF,0
+
+MsgKeyPress:	.ASCII	"Press any key to end program."
+				.BYTE	CR,LF,0
+
+		.TEXT		0
+		.GLOBAL		ASSIGN5
+
+Loop:	movea.l	#InputPrompt, a0
+		jsr PrintMsg
+		
+		move.b #4, d1
+		jsr InHex
+		jsr NewLine
+		
+		bvs Invalid
+		
+		cmpi #0, d0
+		beq Exit
+		
+		move.w d0, d7
+		
+		bra MatchStruct
+		
+		bra Loop
+		
+MatchStruct:
+
+		move.w d7, d6
+		and #0xc0c0, d6
+		cmp.w #0xc0c0, d6	
+		beq MuluBranch
+
+		move.w d7, d6
+		and #0x0600, d6
+		cmp.w #0x0600, d6	
+		beq AddBranch
+		
+		move.w d7, d6
+		and #0x4000, d6
+		cmp.w #0x4000, d6	
+		beq CheckBranch
+		
+		move.w d7, d6
+		and #0x0040, d6
+		cmp.w #0x0040, d6	
+		beq MoveaBranch
+
+		
+		rts
+		
+AddBranch:
+		movea.l #AddPrompt, a0
+		jsr PrintMsg
+		and #0x00c0, d7
+		lsr #6, d7
+		bra CheckSize
+		rts
+
+MoveaBranch:
+		movea.l #MoveaPrompt, a0
+		jsr PrintMsg
+		and #3000, d7
+		lsr #6, d7
+		lsr #6, d7
+		bra CheckSize
+		rts
+		
+MuluBranch:
+		movea.l #MuluPrompt, a0
+		jsr PrintMsg
+		rts
+		
+CheckBranch:
+		jsr PrintMsg
+		and #0x0180, d7
+		lsr #7, d7
+		bra CheckSize
+		rts
+		
+CheckSize:
+		cmpi #0, d7
+		beq PrintByte
+		cmpi #1, d7
+		beq PrintWord
+		cmpi #2, d7
+		beq PrintLong
+		
+PrintByte: 	movea.l	#BytePrompt, a0
+			jsr PrintMsg
+			bra Loop
+
+PrintWord: 	movea.l	#WordPrompt, a0
+			jsr PrintMsg
+			bra Loop
+
+PrintLong: 	movea.l	#LongPrompt, a0
+			jsr PrintMsg
+			bra Loop
+		
+		
+Invalid:
+		movea.l	#InvalidPrompt, a0
+		jsr NewLine
+		jsr PrintMsg
+		bra Loop
+		
+Exit:
+		movea.l	#MsgKeyPress, a0
+		jsr NewLine
+		jsr	PrintMsg
+		jsr ConsoleEcho
+		rts

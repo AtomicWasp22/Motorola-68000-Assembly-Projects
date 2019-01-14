@@ -1,0 +1,99 @@
+		.PSIZE	52
+		.TITLE	"Lab 3"
+
+/****************************************************************
+FILENAME: assign3.a68
+
+STUDENT NAME (AUTHOR): Kian Jones
+
+STUDENT NUMBER:Carleton 101076671
+
+STUDENT E-MAIL ADDRESS: jone0633@algonquincollege.com
+
+LAB SECTION: A3
+
+ASSIGNMENT NUMBER AND NAME:  Lab 3 - String Reverser
+
+PROFESSOR'S NAME: Dave Caughey
+
+PURPOSE: Return a string reversed
+****************************************************************/
+
+	|
+	|Include the file ASCII.i.
+	|
+			.NOLIST
+			.INCLUDE 	"..\\Include\\ASCII.i"
+			.LIST
+
+			.TEXT	1
+Prompt1:	.ASCII		"Enter a string to be reversed"
+			.BYTE		CR,LF
+
+Prompt2:	.BYTE		CR,LF
+			.ASCIZ		"Enter a string: "
+
+Prompt3:	.BYTE		CR,LF,CR,LF
+			.ASCIZ          "The reversed string is: "
+                
+Prompt4:	.BYTE		CR,LF,CR,LF
+			.ASCIZ          "Press any key to end program."
+
+MsgKeyPress:	.ASCII	"Press any key to end program."
+				.BYTE	CR,LF,0
+
+		.TEXT		0
+		.GLOBAL		ASSIGN3
+
+PrintPrompts:
+		movea.l		#Prompt1, a0
+		jsr	PrintMsg
+		
+		movea.l		#Prompt2, a0
+		
+		move.l		#8, d1
+		
+		jmp GetChar
+		
+		
+GetChar:
+		jsr		ConsoleEcho			| GET 1st integer
+		movea.l a4, a5
+		move.l d0, (a4)+
+		
+		cmpi.b	#13, d0
+		beq.b	StartReverse
+		
+		/*
+		cmpi.b #0x0020, a4
+		beq.b	Reverse
+		*/
+		
+		bra GetChar
+		
+
+StartReverse:
+		movea.l		#Prompt3, a0
+		jsr PrintMsg
+		subq.l		#1, a4
+		bra Reverse
+		
+		
+		
+Reverse:
+		subq.l		#1, a4
+		movea.l 	a4, a0
+		jsr PrintMsg
+		movea.l		#0x107D, a5
+		cmp.l 		a4, a5
+		beq.b Exit
+		bra Reverse
+		
+		
+		
+Exit:
+		movea.l	#MsgKeyPress, a0
+		jsr	PrintMsg
+		jsr ConsoleEcho
+		rts
+		

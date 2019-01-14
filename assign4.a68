@@ -1,0 +1,141 @@
+		.PSIZE	42
+		.TITLE	"Testing Boundaries"
+
+/****************************************************************
+FILENAME: assign4.a68
+
+STUDENT NAME (AUTHOR): Kian Jones
+
+STUDENT NUMBER:Carleton 101076671
+
+STUDENT E-MAIL ADDRESS: jone0633@algonquincollege.com
+
+LAB SECTION: A3
+
+ASSIGNMENT NUMBER AND NAME:  Lab 4 - Status of i
+
+PROFESSOR'S NAME: Dave Caughey
+
+PURPOSE: Show the status of an incrementing variable at each iteration
+****************************************************************/
+
+/*
+Include the file ASCII.i.
+*/
+		.NOLIST
+		.INCLUDE "..\\Include\\ASCII.i"
+		.LIST
+
+
+		.TEXT	1
+EnterUpper:		.ASCIZ	"Enter the upper boundary: "
+
+
+EnterLower:		.ASCIZ	"Enter the lower boundary: "
+		.BYTE	CR,LF,0
+		
+Lower:		.ASCII	" Lower boundary"
+		.BYTE	CR,LF,0
+		
+Upper:		.ASCII	" Upper boundary"
+		.BYTE	CR,LF,0
+	
+OutsideMsg:		.ASCII	" ...outside"
+		.BYTE	CR,LF,0
+		
+InsideMsg:			.ASCII	" ...inside"
+		.BYTE	CR,LF,0		
+
+Titles:			.ASCII "i status"
+		.BYTE	CR,LF,0
+
+Dashes:			.ASCII "- ------"
+		.BYTE	CR,LF,0
+
+MsgKeyPress:	.ASCII	"Press any key to end program."
+				.BYTE	CR,LF,0
+
+		.TEXT		0
+		.GLOBAL		ASSIGN4
+
+GetInput:	move.l #1, d1
+			movea.l	#EnterLower, a0
+			jsr PrintMsg
+			jsr InHex
+			move.l d0, d6
+			jsr NewLine
+			
+			movea.l	#EnterUpper, a0
+			jsr PrintMsg
+			jsr InHex
+			move.l d0, d7
+			jsr NewLine
+			
+			movea.l	#Titles, a0
+			jsr PrintMsg
+			
+			movea.l	#Dashes, a0
+			jsr PrintMsg
+			
+			move.l #0, d5	| i
+			bra Loop
+			
+Loop:		cmp.l d6, d5
+			bmi Outside
+			cmp.l d6, d5
+			beq CrossLower
+			
+			cmp.l d7, d5
+			bmi Inside
+			cmp.l d7, d5
+			beq CrossUpper		
+			
+			cmpi #0x0000000A, d5
+			beq Exit
+			cmp.l d7, d5
+			bpl Outside	
+
+CrossLower:	move.l d5, d0
+			jsr OutHex
+			
+			movea.l #Lower, a0
+			jsr PrintMsg
+			
+			add.b #1, d5
+			jmp Loop
+			
+CrossUpper:	move.l d5, d0
+			jsr OutHex
+			
+			movea.l #Upper, a0
+			jsr PrintMsg
+			
+			add.b #1, d5
+			jmp Loop
+			
+Inside:		move.l d5, d0
+			jsr OutHex
+			
+			movea.l #InsideMsg, a0
+			jsr PrintMsg
+			
+			add.b #1, d5
+			jmp Loop
+
+Outside:	move.l d5, d0
+			jsr OutHex
+			
+			movea.l #OutsideMsg, a0
+			jsr PrintMsg
+			
+			add.b #1, d5
+			jmp Loop
+				
+Exit:
+		movea.l	#MsgKeyPress, a0
+		jsr	PrintMsg
+		jsr ConsoleEcho
+		rts
+		
+		
+		
